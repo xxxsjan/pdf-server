@@ -1,70 +1,77 @@
-const Router = require("koa-router");
-const fs = require("fs");
-const path = require("path");
+const Router = require('koa-router');
+const fs = require('fs');
+const path = require('path');
 
 const router = new Router();
+router.get('/', (ctx) => {
+  // 设置头类型, 如果不设置，会直接下载该页面
+  ctx.type = 'html';
+  // 读取文件
+  const pathUrl = path.join(__dirname, '../index.html');
+  ctx.body = fs.createReadStream(pathUrl);
+});
 //使用路由跳转
-router.get("/", async (ctx) => {
-  console.log("请求url", "http://127.0.0.1:5000" + ctx.url);
-  let filename = "xxxx";
-  ctx.set("Content-disposition", "attachment; filename=" + filename + ".pdf"); // attachment
+router.get('/downPdf', async (ctx) => {
+  console.log('请求url', 'http://127.0.0.1:5000' + ctx.url);
+  let filename = 'xxxx';
+  ctx.set('Content-disposition', 'attachment; filename=' + filename + '.pdf'); // attachment
   // ctx.set('Content-disposition', 'inline; filename=' + filename + '.pdf');// inline
   // attachment 请求后就下载文件
   // inline     有时候可以下载，有时候可以直接浏览，好像跟浏览器有关。
-
   // ctx.set("Access-Control-Allow-Origin", "*");
   // ctx.set("Access-Control-Allow-Methods", "OPTIONS,GET, PUT, POST, DELETE");
-  ctx.set("Content-type", "application/pdf");
+  ctx.set('Content-type', 'application/pdf');
 
-  const pathUrl = path.join(__dirname, "../static/test2.pdf");
+  const pathUrl = path.join(__dirname, '../static/test2.pdf');
   let gReadData = fs.createReadStream(pathUrl);
   ctx.body = gReadData;
-  // ctx.body = { msg: 'Hello koa interfaces' };
 });
-
-router.get("/html", (ctx) => {
+router.get('/api', (ctx) => {
+  ctx.body = { msg: 'Hello koa interfaces' };
+});
+router.get('/upload', (ctx) => {
   // 设置头类型, 如果不设置，会直接下载该页面
-  ctx.type = "html";
+  ctx.type = 'html';
   // 读取文件
-  const pathUrl = path.join(__dirname, "../static/upload.html");
+  const pathUrl = path.join(__dirname, '../static/upload.html');
   ctx.body = fs.createReadStream(pathUrl);
 });
 
 // 上传单个或多个文件
-router.post("/upload", (ctx) => {
+router.post('/upload', (ctx) => {
   // https://www.cnblogs.com/tugenhua0707/p/10828869.html
   // console.log('ctx.request', ctx.request);
   let files = ctx.request.files.file;
   if (files.length === undefined) {
     // 上传单个文件，它不是数组，只是单个的对象
-    console.log("单文件上传");
+    console.log('单文件上传');
     uploadFilePublic(ctx, files, false);
   } else {
-    console.log("多文件上传");
+    console.log('多文件上传');
     uploadFilePublic(ctx, files, true);
   }
 
-  return (ctx.body = "上传成功！");
+  return (ctx.body = '上传成功！');
 });
 // 文件下载
-router.get("/fileload/:name", async (ctx) => {
+router.get('/fileload/:name', async (ctx) => {
   const name = ctx.params.name;
   const path = `static/upload/${name}`;
-  console.log("前端想下载：name", name);
+  console.log('前端想下载：name', name);
   ctx.attachment(path);
   await send(ctx, path);
 });
 
 // 上传文件
-const uploadUrl = "http://localhost:5000/static/upload";
+const uploadUrl = 'http://localhost:5000/static/upload';
 /*
  *@flag: 是否是多个文件上传
  */
 const uploadFilePublic = function (ctx, files, flag) {
-  const filePath = path.join(__dirname, "../static/upload/");
+  const filePath = path.join(__dirname, '../static/upload/');
   // 写入文件
   const saveFile = function (file) {
-    console.log("写入文件");
+    console.log('写入文件');
     let rs = fs.createReadStream(file.path); // createWriteStream 不会自己创建不存在的文件夹，需要自行判断创建
     let ws = fs.createWriteStream(filePath + `${file.name}`);
     // 写入方法一
@@ -83,17 +90,17 @@ const uploadFilePublic = function (ctx, files, flag) {
   // 给前端返数据
   const returnBody = function (flag) {
     if (flag) {
-      let url = "";
+      let url = '';
       for (let i = 0; i < files.length; i++) {
         url += uploadUrl + `/${files[i].name},`;
       }
-      url = url.replace(/,$/gi, "");
-      ctx.body = { url: url, code: 200, message: "上传成功" };
+      url = url.replace(/,$/gi, '');
+      ctx.body = { url: url, code: 200, message: '上传成功' };
     } else {
       ctx.body = {
         url: uploadUrl + `/${files.name}`,
         code: 200,
-        message: "上传成功",
+        message: '上传成功',
       };
     }
   };
@@ -108,7 +115,7 @@ const uploadFilePublic = function (ctx, files, flag) {
   }
   // 判断 /static/upload 文件夹是否存在，如果不在的话就创建一个
   if (!fs.existsSync(filePath)) {
-    console.log("目录不存在", filePath);
+    console.log('目录不存在', filePath);
     fs.mkdir(filePath, (err) => {
       if (err) {
         throw new Error(err);
@@ -117,7 +124,7 @@ const uploadFilePublic = function (ctx, files, flag) {
       }
     });
   } else {
-    console.log("目录存在", filePath);
+    console.log('目录存在', filePath);
     returnBody(flag);
   }
 };
