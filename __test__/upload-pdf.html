@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文件上传</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div>
+      选择上传
+      <input type="file" name="file" id="file" multiple="multiple" />
+    </div>
+    <script type="text/javascript">
+      const instance = axios.create({
+        withCredentials: true,
+      });
+      file.onchange = function (e) {
+        var files = e.target.files;
+        console.log("files: ", files);
+        var formData = new FormData();
+        if (files.length > 0) {
+          for (let i = 0; i < files.length; i++) {
+            const f1 = files[i];
+            formData.append("file", f1);
+          }
+        }
+        instance
+          .post("http://127.0.0.1:5000/upload", formData, {
+            onUploadProgress: (progressEvent) => {
+              let complete =
+                (((progressEvent.loaded / progressEvent.total) * 100) | 0) +
+                "%";
+              console.log("上传进度：", complete);
+            },
+          })
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      };
+    </script>
+  </body>
+</html>
