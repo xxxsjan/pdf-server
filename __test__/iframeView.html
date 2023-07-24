@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <button onclick="iframeView()">iframe预览</button>
+      <iframe name="iframeId" id="iframeId"></iframe>
+    </div>
+    <script type="text/javascript">
+      function iframeView() {
+        window.open("/static/pdf/sample.pdf", "iframeId");
+        // iframeDom.src = "/static/pdf/sample.pdf";
+
+        const iframeDom = document.getElementById("iframeId");
+
+        iframeDom.onload = function () {
+          const style = document.createElement("style");
+          style.innerHTML = ``;
+          iframeDom.contentDocument.querySelector("head").appendChild(style);
+        };
+      }
+    </script>
+  </body>
+</html>
